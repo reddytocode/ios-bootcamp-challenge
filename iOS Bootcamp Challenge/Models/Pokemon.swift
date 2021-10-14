@@ -27,6 +27,32 @@ enum PokemonType: String, Decodable, CaseIterable, Identifiable {
 
 }
 
+struct Ability: Decodable {
+    let name: String
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+}
+
+struct Abilities: Decodable {
+    let ability: Ability
+    enum CodingKeys: String, CodingKey {
+        case ability
+    }
+}
+
+struct TypeName: Decodable {
+    let name: String
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+}
+struct Types: Decodable {
+    let type: TypeName
+    enum CodingKeys: String, CodingKey {
+        case type
+    }
+}
 struct Pokemon: Decodable, Equatable {
 
     let id: Int
@@ -62,10 +88,19 @@ struct Pokemon: Decodable, Equatable {
         let officialArtWork = try other.nestedContainer(keyedBy: CodingKeys.self, forKey: .officialArtwork)
         self.image = try? officialArtWork.decode(String.self, forKey: .frontDefault)
 
-        // TODO: Decode list of types & abilities
-
-        self.types = []
-        self.abilities = []
+        var types = [String]()
+        let typesArray = try container.decode([Types]?.self, forKey: .types)
+        typesArray?.forEach{type in
+            types.append(type.type.name)}
+        self.types = types
+        
+        // Decode abilities
+        var abilities = [String]()
+        let abilitiesArray = try container.decode([Abilities]?.self, forKey: .abilities)
+        abilitiesArray?.forEach{ability in
+            abilities.append(ability.ability.name)
+        }
+        self.abilities = abilities
 
         self.weight = try container.decode(Float.self, forKey: .weight)
         self.baseExperience = try container.decode(Int.self, forKey: .baseExperience)

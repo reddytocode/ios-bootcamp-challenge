@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ListViewController: UICollectionViewController {
+class ListViewController: UICollectionViewController, UISearchResultsUpdating {
 
     private var pokemons: [Pokemon] = []
     private var resultPokemons: [Pokemon] = []
@@ -20,6 +20,7 @@ class ListViewController: UICollectionViewController {
         let searchController = SearchBar("Search a pokemon", delegate: nil)
         searchController.text = latestSearch
         searchController.showsCancelButton = !searchController.isSearchBarEmpty
+        searchController.searchResultsUpdater = self
         return searchController
     }()
 
@@ -85,7 +86,10 @@ class ListViewController: UICollectionViewController {
         collectionView.reloadData()
     }
 
-    // TODO: Implement the SearchBar
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchText = searchController.searchBar.text else { return }
+        filterContentForSearchText(searchText)
+    }
 
     // MARK: - UICollectionViewDataSource
 
@@ -103,7 +107,11 @@ class ListViewController: UICollectionViewController {
 
     // MARK: - Navigation
 
-    // TODO: Handle navigation to detail view controller
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let dest = segue.destination as? DetailViewController, let index=collectionView.indexPathsForSelectedItems?.first {
+            dest.pokemon = resultPokemons[index.item]
+        }
+    }
 
     // MARK: - UI Hooks
     

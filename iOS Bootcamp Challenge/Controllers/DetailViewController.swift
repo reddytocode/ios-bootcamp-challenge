@@ -77,11 +77,21 @@ class DetailViewController: UIViewController {
         // abilities
         if let abilities = pokemon.abilities {
             let title = "Abilities"
-            let description = abilities.joined(separator: "\n")
+            let description = abilities.joined(separator: ", ")
             let item = Item(title: title, description: description)
             items.append(item)
         }
-
+        
+        if let types = pokemon.types {
+            let title = "Types"
+            let description = types.joined(separator: ", ")
+            let item = Item(title: title, description: description)
+            items.append(item)
+        }
+        
+        // Name
+        let name = "Name"
+        items.append(Item(title: name, description: "\(pokemon.name)"))
         // weight
         let weight = "Weight"
         items.append(Item(title: weight, description: "\(pokemon.weight/10) kg"))

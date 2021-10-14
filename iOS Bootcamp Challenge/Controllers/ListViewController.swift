@@ -106,25 +106,32 @@ class ListViewController: UICollectionViewController {
     // TODO: Handle navigation to detail view controller
 
     // MARK: - UI Hooks
-
+    
     @objc func refresh() {
         shouldShowLoader = true
 
         var pokemons: [Pokemon] = []
-
-        // TODO: Wait for all requests to finish before updating the collection view
-
+        let group: DispatchGroup = DispatchGroup()
+        
+        group.enter()
         PokeAPI.shared.get(url: "pokemon?limit=30", onCompletion: { (list: PokemonList?, _) in
             guard let list = list else { return }
             list.results.forEach { result in
+                group.enter()
                 PokeAPI.shared.get(url: "/pokemon/\(result.id)/", onCompletion: { (pokemon: Pokemon?, _) in
                     guard let pokemon = pokemon else { return }
                     pokemons.append(pokemon)
-                    self.pokemons = pokemons
-                    self.didRefresh()
+                    group.leave()
                 })
             }
+            group.leave()
         })
+        
+        group.notify(queue: .main){
+            self.pokemons = pokemons
+            self.didRefresh()
+        }
+        
     }
 
     private func didRefresh() {
